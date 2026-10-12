@@ -1,50 +1,51 @@
-# aiagent — public chat for the Sensiple AI Agent
+# aiagent — public prototype for the Sensiple AI Agent
 
-Static front end for the customer chat, published with GitHub Pages.
+A self-contained, static prototype of the Sensiple AI Agent, published with
+GitHub Pages. It demonstrates the operator dashboard and the customer chat
+using fixed sample data.
 
 ## Live URLs
 
-- Landing (redirects to the assistant): https://jeevithkumarjt.github.io/aiagent/
-- Agent: https://jeevithkumarjt.github.io/aiagent/agent/
+- Landing (redirects to the agent): https://jeevithkumarjt.github.io/aiagent/
+- Agent (dashboard + assistant): https://jeevithkumarjt.github.io/aiagent/agent/
 - Chat: https://jeevithkumarjt.github.io/aiagent/agent/chat/
 
-Every visitor is signed in as a guest automatically, so the chat is usable the
-moment the page opens — there is no login screen.
+## This is a prototype
 
-## How it works
+Everything you see is **sample data baked into the static files**. The chat
+answers from a fixed script and the dashboard shows fixed figures. The pages
+make **no network requests at all**, so nothing here can reach the real
+deployment, the real knowledge base or the real model key, and there is nothing
+to abuse or spam.
 
-This repository contains **only the built static files** under `agent/`. GitHub
-Pages serves them; it runs no server code.
+The full platform — crawler, vector index, retrieval, LLM, operator controls —
+runs on a private deployment. Its source lives in the private
+`sensiple-ai-agent` repository; **none of that source or data is in this
+repository**.
 
-The chat itself is not static. Answers come from the FastAPI backend that is
-already deployed alongside the company site. The pages call that backend
-directly at:
+## What is here
 
-    https://www.sensiple.com/agent/api/v1/...
-
-That cross-origin call is allowed because the backend lists this Pages origin
-(`https://jeevithkumarjt.github.io`) in its `CORS_ORIGINS` setting.
+`agent/` contains only the built static files. GitHub Pages serves them; it
+runs no server code.
 
 `.nojekyll` is required: without it GitHub Pages runs Jekyll, which ignores
 directories beginning with an underscore — and every asset here lives in
 `_next/`.
 
-## Abuse controls
-
-Chat tokens are handed out without credentials, so the backend applies a
-per-client-IP ceiling to `POST /api/v1/chat/stream` (a short burst limit plus a
-daily budget). A throttled visitor sees a plain "question limit reached"
-message rather than an error.
-
 ## Rebuilding
 
 The source lives in the private `sensiple-ai-agent` repository, under
-`frontend/`. Build the static bundle with:
+`frontend/`. Build the prototype bundle with:
 
     NEXT_PUBLIC_BASE_PATH=/aiagent/agent \
-    NEXT_PUBLIC_API_BASE=https://www.sensiple.com/agent \
     NEXT_PUBLIC_AUTO_GUEST=1 \
+    NEXT_PUBLIC_DEMO=1 \
     NEXT_STATIC_EXPORT=1 \
     npm run build
+
+`NEXT_PUBLIC_DEMO=1` is what makes this a prototype: `lib/api.ts` answers from
+`lib/demo.ts` instead of calling the API, and the home page renders the sample
+dashboard. Leave that variable unset and the same source builds the real,
+backend-connected application.
 
 Then copy `frontend/out/*` into `agent/` here and commit.
